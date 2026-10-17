@@ -9,6 +9,7 @@ export default async function handler(req, res) {
 
         if (mode === 'subscribe' && token === verifyToken) {
             console.log("WEBHOOK_VERIFIED");
+            res.setHeader('Content-Type', 'text/plain');
             return res.status(200).send(challenge);
         }
         return res.status(403).send("Verification token mismatch");
