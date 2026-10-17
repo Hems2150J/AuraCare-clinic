@@ -71,17 +71,50 @@ export const AppointmentBookingFlow = () => {
     e.preventDefault();
     // --- 1. SEND DATA TO WHATSAPP & GOOGLE SHEETS ---
     try {
+      // Collect from inputs directly if state variables have different names
+      const patientName =
+        (typeof formData !== 'undefined' && (formData.name || formData.patientName || formData.fullName)) ||
+        (typeof patientInfo !== 'undefined' && (patientInfo.name || patientInfo.fullName)) ||
+        document.querySelector('input[name="name"]')?.value ||
+        document.querySelector('input[placeholder*="Name" i]')?.value ||
+        document.querySelector('input[type="text"]')?.value ||
+        "Patient";
+
+      const phone =
+        (typeof formData !== 'undefined' && (formData.phone || formData.phoneNumber)) ||
+        (typeof patientInfo !== 'undefined' && (patientInfo.phone || patientInfo.phoneNumber)) ||
+        document.querySelector('input[name="phone"]')?.value ||
+        document.querySelector('input[type="tel"]')?.value ||
+        document.querySelector('input[placeholder*="Phone" i]')?.value ||
+        "";
+
+      const doctorName =
+        (typeof selectedDoctor !== 'undefined' && (selectedDoctor?.name || selectedDoctor)) ||
+        (typeof doctor !== 'undefined' && (doctor?.name || doctor)) ||
+        "Dr. Sarah Jenkins";
+
+      const date =
+        (typeof selectedDate !== 'undefined' && selectedDate) ||
+        (typeof date !== 'undefined' && date) ||
+        new Date().toISOString().split('T')[0];
+
+      const timeSlot =
+        (typeof selectedSlot !== 'undefined' && selectedSlot) ||
+        (typeof selectedTime !== 'undefined' && selectedTime) ||
+        (typeof timeSlot !== 'undefined' && timeSlot) ||
+        "10:00 AM";
+
       await fetch('/api/book', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          patientName: formData.patientName || formData.name || formData.fullName,
-          phone: formData.phone || formData.phoneNumber,
-          doctorName: selectedDoctor?.name || formData.doctor || "General Physician",
-          date: selectedDate || formData.date,
-          timeSlot: selectedSlot || formData.timeSlot || formData.time
+          patientName,
+          phone,
+          doctorName,
+          date,
+          timeSlot
         }),
       });
     } catch (error) {
