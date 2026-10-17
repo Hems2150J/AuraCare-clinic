@@ -71,7 +71,6 @@ export const AppointmentBookingFlow = () => {
     e.preventDefault();
     // --- 1. SEND DATA TO WHATSAPP & GOOGLE SHEETS ---
     try {
-      // Collect from inputs directly if state variables have different names
       const patientName =
         (typeof formData !== 'undefined' && (formData.name || formData.patientName || formData.fullName)) ||
         (typeof patientInfo !== 'undefined' && (patientInfo.name || patientInfo.fullName)) ||
