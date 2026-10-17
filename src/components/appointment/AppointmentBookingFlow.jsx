@@ -67,8 +67,27 @@ export const AppointmentBookingFlow = () => {
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleFinalSubmit = (e) => {
+  const handleFinalSubmit = async (e) => {
     e.preventDefault();
+    // --- 1. SEND DATA TO WHATSAPP & GOOGLE SHEETS ---
+    try {
+      await fetch('/api/book', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          patientName: formData.patientName || formData.name || formData.fullName,
+          phone: formData.phone || formData.phoneNumber,
+          doctorName: selectedDoctor?.name || formData.doctor || "General Physician",
+          date: selectedDate || formData.date,
+          timeSlot: selectedSlot || formData.timeSlot || formData.time
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to trigger WhatsApp & Google Sheet confirmation:", error);
+    }
+    // ------------------------------------------------
     const newAppt = addAppointment({
       doctorName: activeDoctor.name,
       department: activeDoctor.department,
@@ -136,20 +155,18 @@ export const AppointmentBookingFlow = () => {
             return (
               <div key={idx} className="relative z-10 flex flex-col items-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 ${
-                    isDone
-                      ? 'bg-emerald-500 text-white shadow-sm'
-                      : isCurrent
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 ${isDone
+                    ? 'bg-emerald-500 text-white shadow-sm'
+                    : isCurrent
                       ? 'bg-medical-600 text-white shadow-soft-glow scale-110'
                       : 'bg-white text-slate-400 border-2 border-slate-200'
-                  }`}
+                    }`}
                 >
                   {isDone ? <Check className="w-5 h-5" /> : <Icon className="w-4 h-4" />}
                 </div>
                 <span
-                  className={`text-[11px] font-bold mt-2 hidden sm:block ${
-                    isCurrent ? 'text-medical-600' : isDone ? 'text-emerald-700' : 'text-slate-400'
-                  }`}
+                  className={`text-[11px] font-bold mt-2 hidden sm:block ${isCurrent ? 'text-medical-600' : isDone ? 'text-emerald-700' : 'text-slate-400'
+                    }`}
                 >
                   {item.label}
                 </span>
@@ -182,11 +199,10 @@ export const AppointmentBookingFlow = () => {
                       const deptDocs = doctorsData.filter((d) => d.departmentId === svc.id);
                       if (deptDocs.length > 0) setSelectedDoctorId(deptDocs[0].id);
                     }}
-                    className={`p-3.5 rounded-2xl border text-left text-xs font-bold transition-all ${
-                      selectedDeptId === svc.id
-                        ? 'border-medical-600 bg-medical-50 text-medical-900 shadow-xs'
-                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
-                    }`}
+                    className={`p-3.5 rounded-2xl border text-left text-xs font-bold transition-all ${selectedDeptId === svc.id
+                      ? 'border-medical-600 bg-medical-50 text-medical-900 shadow-xs'
+                      : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
+                      }`}
                   >
                     <span>{svc.title}</span>
                   </button>
@@ -205,11 +221,10 @@ export const AppointmentBookingFlow = () => {
                     <div
                       key={doc.id}
                       onClick={() => setSelectedDoctorId(doc.id)}
-                      className={`p-4 rounded-2xl border cursor-pointer flex items-center gap-3.5 transition-all ${
-                        selectedDoctorId === doc.id
-                          ? 'border-medical-600 bg-medical-50/70 shadow-sm'
-                          : 'border-slate-200 bg-slate-50 hover:bg-white'
-                      }`}
+                      className={`p-4 rounded-2xl border cursor-pointer flex items-center gap-3.5 transition-all ${selectedDoctorId === doc.id
+                        ? 'border-medical-600 bg-medical-50/70 shadow-sm'
+                        : 'border-slate-200 bg-slate-50 hover:bg-white'
+                        }`}
                     >
                       <img
                         src={doc.photo}
@@ -288,11 +303,10 @@ export const AppointmentBookingFlow = () => {
                       key={sIdx}
                       type="button"
                       onClick={() => setSelectedSlot(slot)}
-                      className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                        isSelected
-                          ? 'border-medical-600 bg-medical-600 text-white shadow-soft-glow'
-                          : 'border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-300'
-                      }`}
+                      className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${isSelected
+                        ? 'border-medical-600 bg-medical-600 text-white shadow-soft-glow'
+                        : 'border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-300'
+                        }`}
                     >
                       <Clock className="w-3.5 h-3.5" />
                       <span>{slot}</span>
@@ -456,11 +470,10 @@ export const AppointmentBookingFlow = () => {
                 <button
                   type="button"
                   onClick={() => setPatientData({ ...patientData, paymentMethod: 'insurance' })}
-                  className={`p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between ${
-                    patientData.paymentMethod === 'insurance'
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
-                      : 'border-slate-200 bg-slate-50 text-slate-700'
-                  }`}
+                  className={`p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between ${patientData.paymentMethod === 'insurance'
+                    ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
+                    : 'border-slate-200 bg-slate-50 text-slate-700'
+                    }`}
                 >
                   <span>Direct Insurance Claim</span>
                   <ShieldCheck className="w-4 h-4 text-emerald-600" />
@@ -469,11 +482,10 @@ export const AppointmentBookingFlow = () => {
                 <button
                   type="button"
                   onClick={() => setPatientData({ ...patientData, paymentMethod: 'card' })}
-                  className={`p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between ${
-                    patientData.paymentMethod === 'card'
-                      ? 'border-medical-500 bg-medical-50 text-medical-900'
-                      : 'border-slate-200 bg-slate-50 text-slate-700'
-                  }`}
+                  className={`p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between ${patientData.paymentMethod === 'card'
+                    ? 'border-medical-500 bg-medical-50 text-medical-900'
+                    : 'border-slate-200 bg-slate-50 text-slate-700'
+                    }`}
                 >
                   <span>Credit / Debit Card (Stripe Mock)</span>
                   <CreditCard className="w-4 h-4 text-medical-600" />
