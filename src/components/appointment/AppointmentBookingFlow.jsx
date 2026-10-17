@@ -71,34 +71,17 @@ export const AppointmentBookingFlow = () => {
     e.preventDefault();
     // --- SEND DATA TO WHATSAPP & GOOGLE SHEETS ---
     try {
-      const inputElements = document.querySelectorAll('input, select, textarea');
-      let extractedName = "Patient";
-      let extractedPhone = "";
-
-      inputElements.forEach((el) => {
-        const val = el.value?.trim();
-        const placeholder = (el.placeholder || "").toLowerCase();
-        const nameAttr = (el.name || "").toLowerCase();
-        const type = (el.type || "").toLowerCase();
-
-        if (type === 'tel' || nameAttr.includes('phone') || placeholder.includes('phone') || placeholder.includes('mobile')) {
-          if (val) extractedPhone = val;
-        } else if (nameAttr.includes('name') || placeholder.includes('name')) {
-          if (val) extractedName = val;
-        }
-      });
-
       await fetch('/api/book', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          patientName: extractedName,
-          phone: extractedPhone,
-          doctorName: "Dr. AuraCare Specialist",
-          date: new Date().toLocaleDateString('en-CA'),
-          timeSlot: "Confirmed Slot"
+          patientName: patientData.fullName || "Patient",
+          phone: patientData.phone || "",
+          doctorName: activeDoctor?.name || "Dr. AuraCare Specialist",
+          date: bookingDate || new Date().toISOString().split('T')[0],
+          timeSlot: selectedSlot || "11:30 AM"
         }),
       });
     } catch (err) {
