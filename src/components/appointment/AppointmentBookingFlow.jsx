@@ -69,39 +69,24 @@ export const AppointmentBookingFlow = () => {
 
   const handleFinalSubmit = async (e) => {
     e.preventDefault();
-    // --- 1. SEND DATA TO WHATSAPP & GOOGLE SHEETS ---
+    // --- SEND DATA TO WHATSAPP & GOOGLE SHEETS ---
     try {
-      const patientName =
-        (typeof formData !== 'undefined' && (formData.name || formData.patientName || formData.fullName)) ||
-        (typeof patientInfo !== 'undefined' && (patientInfo.name || patientInfo.fullName)) ||
-        document.querySelector('input[name="name"]')?.value ||
-        document.querySelector('input[placeholder*="Name" i]')?.value ||
-        document.querySelector('input[type="text"]')?.value ||
-        "Patient";
+      const inputElements = document.querySelectorAll('input, select, textarea');
+      let extractedName = "Patient";
+      let extractedPhone = "";
 
-      const phone =
-        (typeof formData !== 'undefined' && (formData.phone || formData.phoneNumber)) ||
-        (typeof patientInfo !== 'undefined' && (patientInfo.phone || patientInfo.phoneNumber)) ||
-        document.querySelector('input[name="phone"]')?.value ||
-        document.querySelector('input[type="tel"]')?.value ||
-        document.querySelector('input[placeholder*="Phone" i]')?.value ||
-        "";
+      inputElements.forEach((el) => {
+        const val = el.value?.trim();
+        const placeholder = (el.placeholder || "").toLowerCase();
+        const nameAttr = (el.name || "").toLowerCase();
+        const type = (el.type || "").toLowerCase();
 
-      const doctorName =
-        (typeof selectedDoctor !== 'undefined' && (selectedDoctor?.name || selectedDoctor)) ||
-        (typeof doctor !== 'undefined' && (doctor?.name || doctor)) ||
-        "Dr. Sarah Jenkins";
-
-      const date =
-        (typeof selectedDate !== 'undefined' && selectedDate) ||
-        (typeof date !== 'undefined' && date) ||
-        new Date().toISOString().split('T')[0];
-
-      const timeSlot =
-        (typeof selectedSlot !== 'undefined' && selectedSlot) ||
-        (typeof selectedTime !== 'undefined' && selectedTime) ||
-        (typeof timeSlot !== 'undefined' && timeSlot) ||
-        "10:00 AM";
+        if (type === 'tel' || nameAttr.includes('phone') || placeholder.includes('phone') || placeholder.includes('mobile')) {
+          if (val) extractedPhone = val;
+        } else if (nameAttr.includes('name') || placeholder.includes('name')) {
+          if (val) extractedName = val;
+        }
+      });
 
       await fetch('/api/book', {
         method: 'POST',
@@ -109,17 +94,17 @@ export const AppointmentBookingFlow = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          patientName,
-          phone,
-          doctorName,
-          date,
-          timeSlot
+          patientName: extractedName,
+          phone: extractedPhone,
+          doctorName: "Dr. AuraCare Specialist",
+          date: new Date().toLocaleDateString('en-CA'),
+          timeSlot: "Confirmed Slot"
         }),
       });
-    } catch (error) {
-      console.error("Failed to trigger WhatsApp & Google Sheet confirmation:", error);
+    } catch (err) {
+      console.error("Booking dispatch error:", err);
     }
-    // ------------------------------------------------
+    // ---------------------------------------------
     const newAppt = addAppointment({
       doctorName: activeDoctor.name,
       department: activeDoctor.department,
