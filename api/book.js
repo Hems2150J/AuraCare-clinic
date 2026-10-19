@@ -58,3 +58,19 @@ export default async function handler(req, res) {
                         }
                     ]
                 }
+            })
+        });
+
+        const metaData = await metaResponse.json();
+
+        return res.status(200).json({
+            success: true,
+            bookingId: bookingId,
+            metaStatus: metaData
+        });
+
+    } catch (error) {
+        console.error("Booking error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+}
