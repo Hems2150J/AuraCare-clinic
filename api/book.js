@@ -44,7 +44,7 @@ export default async function handler(req, res) {
                 template: {
                     name: "appointment_confirm", // changed from appointment_confirmation
                     language: {
-                        code: "en" // changed to en
+                        code: "en_US" // changed to en
                     },
                     components: [
                         {
