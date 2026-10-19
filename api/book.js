@@ -31,6 +31,11 @@ export default async function handler(req, res) {
         });
 
         // 2. Send official Meta WhatsApp template to the patient
+        // "hello_world" is Meta's default test template (no components).
+        // Change templateName to "appointment_confirm" for your custom approved template.
+        const templateName = "hello_world";
+        const isHelloWorld = templateName === "hello_world";
+
         const metaResponse = await fetch(`https://graph.facebook.com/v21.0/${process.env.PHONE_NUMBER_ID}/messages`, {
             method: 'POST',
             headers: {
@@ -42,21 +47,23 @@ export default async function handler(req, res) {
                 to: formattedPhone,
                 type: "template",
                 template: {
-                    name: "appointment_confirm", // changed from appointment_confirmation
+                    name: templateName,
                     language: {
-                        code: "en_US" // changed to en
+                        code: isHelloWorld ? "en_US" : "en"
                     },
-                    components: [
-                        {
-                            type: "body",
-                            parameters: [
-                                { type: "text", text: patientName },
-                                { type: "text", text: doctorName },
-                                { type: "text", text: date },
-                                { type: "text", text: timeSlot }
-                            ]
-                        }
-                    ]
+                    ...(!isHelloWorld && {
+                        components: [
+                            {
+                                type: "body",
+                                parameters: [
+                                    { type: "text", text: patientName },
+                                    { type: "text", text: doctorName },
+                                    { type: "text", text: date },
+                                    { type: "text", text: timeSlot }
+                                ]
+                            }
+                        ]
+                    })
                 }
             })
         });
