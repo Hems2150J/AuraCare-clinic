@@ -42,33 +42,19 @@ export default async function handler(req, res) {
                 to: formattedPhone,
                 type: "template",
                 template: {
-                    name: "appointment_confirmation",
-                    language: { code: "en_GB" },
+                    name: "appointment_confirm", // changed from appointment_confirmation
+                    language: {
+                        code: "en" // changed to en
+                    },
                     components: [
                         {
                             type: "body",
                             parameters: [
                                 { type: "text", text: patientName },
                                 { type: "text", text: doctorName },
-                                { type: "text", text: `${date} at ${timeSlot}` },
-                                { type: "text", text: process.env.HOSPITAL_MAPS_LINK || "https://maps.google.com" }
+                                { type: "text", text: date },
+                                { type: "text", text: timeSlot }
                             ]
                         }
                     ]
                 }
-            })
-        });
-
-        const metaData = await metaResponse.json();
-
-        return res.status(200).json({
-            success: true,
-            bookingId: bookingId,
-            metaStatus: metaData
-        });
-
-    } catch (error) {
-        console.error("Booking error:", error);
-        return res.status(500).json({ error: error.message });
-    }
-}
