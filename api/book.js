@@ -43,7 +43,7 @@ export default async function handler(req, res) {
                 type: "template",
                 template: {
                     name: "appointment_confirmation",
-                    language: { code: "en_US" },
+                    language: { code: "en_GB" },
                     components: [
                         {
                             type: "body",
